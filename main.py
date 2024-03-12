@@ -31,21 +31,21 @@ db_name = 'meme'
 engine = create_engine(f"mysql+pymysql://{db_user}:{db_password}@{db_host}/{db_name}")
 
 # Define the table schema
-table_schema = """
-CREATE TABLE gene (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255),
-    url VARCHAR(255),
-    width INT,
-    height INT,
-    box_count INT,
-    captions INT
+create_table = """
+CREATE TABLE IF NOT EXISTS memes (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(255),
+        url VARCHAR(255),
+        width INT,
+        height INT,
+        box_count INT,
+        captions INT
 )
 """
 
 # Execute the SQL command to create the table
 with engine.connect() as connection:
-    connection.execute(table_schema)
+    connection.execute(create_table )
 
 # Create SQLAlchemy engine
 engine = create_engine(f"mysql+pymysql://{db_user}:{db_password}@{db_host}/{db_name}")
