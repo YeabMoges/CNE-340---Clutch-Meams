@@ -11,8 +11,25 @@
 
 
 import pandas as pd
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text  # Keep both imports from master and JTN_Branch
 import requests
+import random
+from PIL import Image
+from io import BytesIO
+import matplotlib.pyplot as plt
+import keyboard
+
+
+def fetch_images_from_api(api_url):
+    response = requests.get(api_url)
+    data = response.json()
+    memes_data = data.get('data', {}).get('memes', [])
+    return memes_data
+
+
+def select_random_image(images):
+    return random.choice(images)
+
 
 # Fetch data from the API
 api_url = "https://api.imgflip.com/get_memes"
