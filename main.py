@@ -11,7 +11,7 @@
 
 
 import pandas as pd
-from sqlalchemy import create_engine, text
+from sqlalchemy import create_engine, text  # Keep both imports from master and JTN_Branch
 import requests
 import random
 from PIL import Image
