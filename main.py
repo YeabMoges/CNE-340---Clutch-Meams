@@ -31,44 +31,69 @@ def select_random_image(images):
     return random.choice(images)
 
 
-# Fetch data from the API
-api_url = "https://api.imgflip.com/get_memes"
-response = requests.get(api_url)
-data = response.json()
+def display_image(image_url):
+    response = requests.get(image_url)
+    img = Image.open(BytesIO(response.content))
+    plt.imshow(img)
+    plt.axis('off')
+    plt.show()
 
-# Create DataFrame from API response data
-df = pd.DataFrame(data)
 
-# Database connection details
-db_host = '127.0.0.1'
-db_user = 'root'
-db_password = ''
-db_name = 'meme'
+def analytics():
+    with engine.connect() as connection:
+        # top 10 captions analytics
+        query_top_captions = text("SELECT name, captions FROM memes ORDER BY captions DESC LIMIT 10")
+        result_top_captions = connection.execute(query_top_captions)
+        top_captions = result_top_captions.fetchall()
 
-engine = create_engine(f"mysql+pymysql://{db_user}:{db_password}@{db_host}/{db_name}")
+        # lowest 10 captions analytics
+        query_lowest_captions = text("SELECT name, captions FROM memes ORDER BY captions ASC LIMIT 10")
+        result_lowest_captions = connection.execute(query_lowest_captions)
+        lowest_captions = result_lowest_captions.fetchall()
 
-# Define the table schema
-create_table = """
-CREATE TABLE IF NOT EXISTS memes (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        name VARCHAR(255),
-        url VARCHAR(255),
-        width INT,
-        height INT,
-        box_count INT,
-        captions INT
-)
-"""
+        # average of all captions
+        query_avg_caption = text("SELECT AVG(captions) FROM memes")
+        result_avg_caption = connection.execute(query_avg_caption)
+        avg_caption = result_avg_caption.scalar()
 
-# Execute the SQL command to create the table
-with engine.connect() as connection:
-    connection.execute(create_table )
+    return top_captions, lowest_captions, avg_caption
 
-# Create SQLAlchemy engine
-engine = create_engine(f"mysql+pymysql://{db_user}:{db_password}@{db_host}/{db_name}")
 
-# Insert the DataFrame into the database
-df.to_sql(name='gene', con=engine, if_exists='append', index=False)
+if __name__ == "__main__":
 
-# Dispose the engine
-engine.dispose()
+    # Fetch data from the API
+    api_url = "https://api.imgflip.com/get_memes"
+    memes_data = fetch_images_from_api(api_url)
+
+    # Create DataFrame
+    df = pd.DataFrame(memes_data)
+    # Database connection
+    db_host = '127.0.0.1'
+    db_user = 'root'
+    db_password = ''
+    db_name = 'meme'
+
+    # Create engine
+    engine = create_engine(f"mysql+pymysql://{db_user}:{db_password}@{db_host}/{db_name}")
+
+    # Create table
+    create_table = """
+     CREATE TABLE IF NOT EXISTS memes (
+         id INT AUTO_INCREMENT PRIMARY KEY,
+         name VARCHAR(255),
+         url VARCHAR(255),
+         width INT,
+         height INT,
+         box_count INT,
+         captions INT
+     )
+     """
+
+    # Execute the SQL command to create the table
+    with engine.connect() as connection:
+        connection.execute(text("DROP TABLE IF EXISTS memes"))
+        connection.execute(text(create_table))
+
+        # Insert the DataFrame into the database
+        df.to_sql(name='memes', con=engine, if_exists='append', index=False)
+
