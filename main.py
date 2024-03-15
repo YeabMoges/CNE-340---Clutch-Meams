@@ -30,6 +30,35 @@ def fetch_images_from_api(api_url):
 def select_random_image(images):
     return random.choice(images)
 
+
+def display_image(image_url):
+    response = requests.get(image_url)
+    img = Image.open(BytesIO(response.content))
+    plt.imshow(img)
+    plt.axis('off')
+    plt.show()
+
+
+def analytics():
+    with engine.connect() as connection:
+        # top 10 captions analytics
+        query_top_captions = text("SELECT name, captions FROM memes ORDER BY captions DESC LIMIT 10")
+        result_top_captions = connection.execute(query_top_captions)
+        top_captions = result_top_captions.fetchall()
+
+        # lowest 10 captions analytics
+        query_lowest_captions = text("SELECT name, captions FROM memes ORDER BY captions ASC LIMIT 10")
+        result_lowest_captions = connection.execute(query_lowest_captions)
+        lowest_captions = result_lowest_captions.fetchall()
+
+        # average of all captions
+        query_avg_caption = text("SELECT AVG(captions) FROM memes")
+        result_avg_caption = connection.execute(query_avg_caption)
+        avg_caption = result_avg_caption.scalar()
+
+    return top_captions, lowest_captions, avg_caption
+
+
 if __name__ == "__main__":
 
     # Fetch data from the API
