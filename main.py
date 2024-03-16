@@ -115,3 +115,16 @@ if __name__ == "__main__":
         "Captions": top_ten_captions
     })
     print(top)
+
+    print("\nTop 10 captions with the lowest values:")
+    for captions, value in lowest_captions:
+        low_ten_memes.append(captions)
+        low_ten_captions.append(value)
+    low = pd.DataFrame({
+        "Name": low_ten_memes,
+        "Captions": low_ten_captions
+    })
+    print(low)
+
+
+    print(f"\nAverage value of all captions: {avg_caption}")
