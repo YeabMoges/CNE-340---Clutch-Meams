@@ -97,3 +97,21 @@ if __name__ == "__main__":
         # Insert the DataFrame into the database
         df.to_sql(name='memes', con=engine, if_exists='append', index=False)
 
+    # Perform Analytics
+    top_captions, lowest_captions, avg_caption = analytics()
+
+    top_ten_memes = []
+    top_ten_captions = []
+
+    low_ten_memes = []
+    low_ten_captions = []
+
+    print("Top 10 captions with the highest values:")
+    for captions, value in top_captions:
+        top_ten_memes.append(captions)
+        top_ten_captions.append(value)
+    top = pd.DataFrame({
+        "Name": top_ten_memes,
+        "Captions": top_ten_captions
+    })
+    print(top)
