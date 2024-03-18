@@ -1,4 +1,3 @@
-
 # Group Project Source Code
 #
 #
@@ -56,50 +55,6 @@ def analytics():
         result_avg_caption = connection.execute(query_avg_caption)
         avg_caption = result_avg_caption.scalar()
 
-    return top_captions, lowest_captions, avg_caption
-
-
-if __name__ == "__main__":
-
-    # Fetch data from the API
-    api_url = "https://api.imgflip.com/get_memes"
-    memes_data = fetch_images_from_api(api_url)
-
-    # Create DataFrame
-    df = pd.DataFrame(memes_data)
-    # Database connection
-    db_host = '127.0.0.1'
-    db_user = 'root'
-    db_password = ''
-    db_name = 'meme'
-
-    # Create engine
-    engine = create_engine(f"mysql+pymysql://{db_user}:{db_password}@{db_host}/{db_name}")
-
-    # Create table
-    create_table = """
-     CREATE TABLE IF NOT EXISTS memes (
-         id INT AUTO_INCREMENT PRIMARY KEY,
-         name VARCHAR(255),
-         url VARCHAR(255),
-         width INT,
-         height INT,
-         box_count INT,
-         captions INT
-     )
-     """
-
-    # Execute the SQL command to create the table
-    with engine.connect() as connection:
-        connection.execute(text("DROP TABLE IF EXISTS memes"))
-        connection.execute(text(create_table))
-
-        # Insert the DataFrame into the database
-        df.to_sql(name='memes', con=engine, if_exists='append', index=False)
-
-    # Perform Analytics
-    top_captions, lowest_captions, avg_caption = analytics()
-
     top_ten_memes = []
     top_ten_captions = []
 
@@ -127,6 +82,48 @@ if __name__ == "__main__":
     print(low)
 
     print(f"\nAverage value of all captions: {avg_caption}")
+
+
+if __name__ == "__main__":
+
+    # Fetch data from the API
+    api_url = "https://api.imgflip.com/get_memes"
+    memes_data = fetch_images_from_api(api_url)
+
+    # Create DataFrame
+    df = pd.DataFrame(memes_data)
+
+    # Database connection
+    db_host = '127.0.0.1'
+    db_user = 'root'
+    db_password = ''
+    db_name = 'meme'
+
+    # Create engine
+    engine = create_engine(f"mysql+pymysql://{db_user}:{db_password}@{db_host}/{db_name}")
+
+    # Create table
+    create_table = """
+       CREATE TABLE IF NOT EXISTS memes (
+           id INT AUTO_INCREMENT PRIMARY KEY,
+           name VARCHAR(255),
+           url VARCHAR(255),
+           width INT,
+           height INT,
+           box_count INT,
+           captions INT
+       )
+       """
+
+    analytics()
+
+    # Execute the SQL command to create or update the table
+    with engine.connect() as connection:
+        connection.execute(text("DROP TABLE IF EXISTS memes"))
+        connection.execute(text(create_table))
+
+        # Insert the DataFrame into the database
+        df.to_sql(name='memes', con=engine, if_exists='append', index=False)
 
     # Generate image when space key is pressed
     while True:
