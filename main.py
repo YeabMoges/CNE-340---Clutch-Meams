@@ -126,5 +126,15 @@ if __name__ == "__main__":
     })
     print(low)
 
-
     print(f"\nAverage value of all captions: {avg_caption}")
+
+    # Generate image when space key is pressed
+    while True:
+        if keyboard.is_pressed(' '):  # Check if space key is pressed
+            # Select a random image from the fetched data
+            random_image = select_random_image(memes_data)
+            if random_image:
+                random_image_url = random_image.get('url')
+                display_image(random_image_url)
+            else:
+                print("No images available.")
